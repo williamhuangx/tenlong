@@ -40,23 +40,23 @@ def init_db():
         # 检查初始化标记，避免重复执行
         check_init = """
         SELECT COUNT(*) as cnt FROM information_schema.tables
-        WHERE table_schema = DATABASE() AND table_name = 'db_initialized'
+        WHERE table_schema = current_schema() AND table_name = 'db_initialized'
         """
         result = db.fetch_one(check_init)
         if result and result['cnt'] > 0:
             print("Database already initialized, skipping...")
             return
 
-        print("Initializing MySQL database...")
+        print("Initializing PostgreSQL database...")
 
         # Create users table
         create_users_table = """
         CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id SERIAL PRIMARY KEY,
             username VARCHAR(50) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
             logo_img TEXT,
-            logo_data LONGBLOB,
+            logo_data BYTEA,
             logo_content_type VARCHAR(100),
             address TEXT,
             tel VARCHAR(100),
@@ -71,7 +71,7 @@ def init_db():
         check_orders = """
         SELECT COUNT(*) as cnt
         FROM information_schema.tables
-        WHERE table_schema = DATABASE() AND table_name = 'orders'
+        WHERE table_schema = current_schema() AND table_name = 'orders'
         """
         result = db.fetch_one(check_orders)
 
@@ -79,7 +79,7 @@ def init_db():
             # Create orders table
             create_orders_table = """
             CREATE TABLE orders (
-                id INT AUTO_INCREMENT PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 no VARCHAR(200),
                 nama VARCHAR(200),
@@ -105,10 +105,10 @@ def init_db():
                 order_amount DECIMAL(10, 2),
                 status VARCHAR(20),
                 description TEXT,
-                image_data LONGBLOB,
+                image_data BYTEA,
                 image_content_type VARCHAR(100),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """
             db.execute(create_orders_table)
@@ -125,11 +125,11 @@ def init_db():
                 check_image_col = """
                 SELECT COUNT(*) as cnt
                 FROM information_schema.columns
-                WHERE table_schema = DATABASE() AND table_name = 'orders' AND column_name = 'image_data'
+                WHERE table_schema = current_schema() AND table_name = 'orders' AND column_name = 'image_data'
                 """
                 result = db.fetch_one(check_image_col)
                 if result and result['cnt'] == 0:
-                    db.execute("ALTER TABLE orders ADD COLUMN image_data LONGBLOB")
+                    db.execute("ALTER TABLE orders ADD COLUMN image_data BYTEA")
                     db.execute("ALTER TABLE orders ADD COLUMN image_content_type VARCHAR(100)")
                     print("Added image_data and image_content_type columns")
             except Exception as e:
@@ -168,15 +168,15 @@ def init_db():
         # Mark database as initialized
         create_init_table = """
         CREATE TABLE db_initialized (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+            id SERIAL PRIMARY KEY,
             initialized_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """
         db.execute(create_init_table)
 
-        print("MySQL database initialized successfully")
+        print("PostgreSQL database initialized successfully")
     except Exception as e:
-        print(f"MySQL database initialization failed: {e}")
+        print(f"PostgreSQL database initialization failed: {e}")
         print("Application will continue, but some features may not work")
 
 
@@ -202,6 +202,8 @@ def admin_required(f):
         if not user or user['username'] != 'admin':
             flash('Access denied. Admin only.', 'danger')
             return redirect(url_for('order_list'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route('/orders/update_status/<int:order_id>', methods=['POST'])
@@ -251,21 +253,6 @@ def update_order_status(order_id):
             flash(f'Update failed: {str(e)}', 'danger')
     
     return redirect(url_for('order_list'))
-
-
-def admin_required(f):
-    """Decorator to require admin access"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Please login first', 'warning')
-            return redirect(url_for('login'))
-        user = User.find_by_id(session['user_id'])
-        if not user or user['username'] != 'admin':
-            flash('Access denied. Admin only.', 'danger')
-            return redirect(url_for('order_list'))
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 def activation_required(f):

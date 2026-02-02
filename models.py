@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from config import Config
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -11,11 +12,11 @@ class Database:
         if not self.connection:
             self._create_connection()
         else:
-            # 尝试执行简单查询，检查连接是否仍然有效
+            # 尝试ping连接，检查是否仍然有效
             try:
-                with self.connection.cursor() as cursor:
-                    cursor.execute("SELECT 1")
-                    cursor.fetchone()
+                self.connection.closed
+                if self.connection.closed != 0:
+                    self._create_connection()
             except Exception:
                 # 连接失效，重新创建
                 self._create_connection()
@@ -23,75 +24,37 @@ class Database:
 
     def _create_connection(self):
         """创建新的数据库连接"""
-        try:
-            self.connection = psycopg2.connect(
-                Config.DB_URI,
-                connect_timeout=10  # 添加连接超时：10秒
-            )
-            # PostgreSQL 需要设置 autocommit 或手动提交
-            # 这里设置为 autocommit 模式
-            self.connection.autocommit = True
-        except Exception as e:
-            print(f"数据库连接失败: {e}")
-            self.connection = None
+        self.connection = psycopg2.connect(
+            Config.DB_URI,
+            cursor_factory=RealDictCursor,
+            connect_timeout=10  # 添加连接超时：10秒
+        )
+        # PostgreSQL 需要设置 autocommit 或手动提交
+        # 这里设置为 autocommit 模式
+        self.connection.autocommit = True
 
     def close(self):
         if self.connection:
-            try:
-                self.connection.close()
-            except Exception:
-                pass
-            finally:
-                self.connection = None
+            self.connection.close()
+            self.connection = None
 
     def execute(self, query, params=None):
         conn = self.connect()
-        if not conn:
-            return None
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute(query, params or ())
-                return cursor.lastrowid
-        except Exception as e:
-            print(f"执行SQL失败: {e}")
-            print(f"SQL: {query}")
-            print(f"参数: {params}")
-            return None
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            return cursor.lastrowid
 
     def fetch_all(self, query, params=None):
         conn = self.connect()
-        if not conn:
-            return []
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute(query, params or ())
-                # 将结果转换为字典列表
-                columns = [desc[0] for desc in cursor.description]
-                return [dict(zip(columns, row)) for row in cursor.fetchall()]
-        except Exception as e:
-            print(f"执行SQL失败: {e}")
-            print(f"SQL: {query}")
-            print(f"参数: {params}")
-            return []
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            return cursor.fetchall()
 
     def fetch_one(self, query, params=None):
         conn = self.connect()
-        if not conn:
-            return None
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute(query, params or ())
-                row = cursor.fetchone()
-                if row:
-                    # 将结果转换为字典
-                    columns = [desc[0] for desc in cursor.description]
-                    return dict(zip(columns, row))
-                return None
-        except Exception as e:
-            print(f"执行SQL失败: {e}")
-            print(f"SQL: {query}")
-            print(f"参数: {params}")
-            return None
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            return cursor.fetchone()
 
 # 单例数据库实例
 db = Database()

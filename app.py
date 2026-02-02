@@ -40,7 +40,7 @@ def init_db():
         # 检查初始化标记，避免重复执行
         check_init = """
         SELECT COUNT(*) as cnt FROM information_schema.tables
-        WHERE table_schema = current_schema() AND table_name = 'db_initialized'
+        WHERE table_schema = 'public' AND table_name = 'db_initialized'
         """
         result = db.fetch_one(check_init)
         if result and result['cnt'] > 0:
@@ -62,7 +62,7 @@ def init_db():
             tel VARCHAR(100),
             fac VARCHAR(100),
             is_active BOOLEAN DEFAULT FALSE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT NOW()
         )
         """
         db.execute(create_users_table)
@@ -71,7 +71,7 @@ def init_db():
         check_orders = """
         SELECT COUNT(*) as cnt
         FROM information_schema.tables
-        WHERE table_schema = current_schema() AND table_name = 'orders'
+        WHERE table_schema = 'public' AND table_name = 'orders'
         """
         result = db.fetch_one(check_orders)
 
@@ -107,8 +107,8 @@ def init_db():
                 description TEXT,
                 image_data BYTEA,
                 image_content_type VARCHAR(100),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW()
             )
             """
             db.execute(create_orders_table)
@@ -119,19 +119,36 @@ def init_db():
             """
             db.execute(create_index)
         else:
-            # Orders table exists, check and add image columns if needed
+            # Orders table exists, update column types if needed
             try:
-                # Check if image_data column exists
-                check_image_col = """
-                SELECT COUNT(*) as cnt
-                FROM information_schema.columns
-                WHERE table_schema = current_schema() AND table_name = 'orders' AND column_name = 'image_data'
-                """
-                result = db.fetch_one(check_image_col)
-                if result and result['cnt'] == 0:
-                    db.execute("ALTER TABLE orders ADD COLUMN image_data BYTEA")
-                    db.execute("ALTER TABLE orders ADD COLUMN image_content_type VARCHAR(100)")
-                    print("Added image_data and image_content_type columns")
+                alter_queries = [
+                    "ALTER TABLE orders ALTER COLUMN no TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat1 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat2 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat3 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat4 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat5 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat6 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat7 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat8 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat9 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN bram_karat10 TYPE VARCHAR(200)",
+                    "ALTER TABLE orders ALTER COLUMN spl_qc TYPE VARCHAR(200)",
+                ]
+                for query in alter_queries:
+                    try:
+                        db.execute(query)
+                    except Exception as e:
+                        # Column might already have the correct type
+                        print(f"Note: {e}")
+            except Exception as e:
+                print(f"Error updating column types: {e}")
+
+            # Add image_data and image_content_type columns if they don't exist
+            try:
+                db.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS image_data BYTEA")
+                db.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS image_content_type VARCHAR(100)")
+                print("Added image_data and image_content_type columns")
             except Exception as e:
                 print(f"Note: {e}")
 
@@ -169,7 +186,7 @@ def init_db():
         create_init_table = """
         CREATE TABLE db_initialized (
             id SERIAL PRIMARY KEY,
-            initialized_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            initialized_at TIMESTAMP DEFAULT NOW()
         )
         """
         db.execute(create_init_table)
@@ -202,8 +219,6 @@ def admin_required(f):
         if not user or user['username'] != 'admin':
             flash('Access denied. Admin only.', 'danger')
             return redirect(url_for('order_list'))
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 @app.route('/orders/update_status/<int:order_id>', methods=['POST'])
@@ -253,6 +268,21 @@ def update_order_status(order_id):
             flash(f'Update failed: {str(e)}', 'danger')
     
     return redirect(url_for('order_list'))
+
+
+def admin_required(f):
+    """Decorator to require admin access"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login first', 'warning')
+            return redirect(url_for('login'))
+        user = User.find_by_id(session['user_id'])
+        if not user or user['username'] != 'admin':
+            flash('Access denied. Admin only.', 'danger')
+            return redirect(url_for('order_list'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def activation_required(f):
@@ -698,6 +728,3 @@ if __name__ == '__main__':
     # Start Flask application immediately
     debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     app.run(host='0.0.0.0', port=5000, debug=debug_mode)
-
-# WSGI application instance for Vercel
-gunicorn_app = app

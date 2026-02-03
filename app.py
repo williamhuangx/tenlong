@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 import os
 import threading
+import traceback
 from functools import wraps
 from werkzeug.security import generate_password_hash
 from models import db, User, Order
@@ -710,6 +711,21 @@ def order_delete(order_id):
         except Exception as e:
             flash(f'Delete failed: {str(e)}', 'danger')
     return redirect(url_for('order_list'))
+
+
+# 添加全局错误处理器
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # 记录错误详情
+    print(f"Error occurred: {str(e)}")
+    print(f"Traceback: {traceback.format_exc()}")
+
+    # 如果是调试模式，返回详细的错误信息
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    if debug_mode:
+        return render_template('error.html', error=str(e), traceback=traceback.format_exc()), 500
+    else:
+        return render_template('error.html', error="An internal server error occurred"), 500
 
 
 if __name__ == '__main__':

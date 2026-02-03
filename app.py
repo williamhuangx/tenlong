@@ -4,10 +4,6 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "<h1>腾龙科技1</h1>"
-
-@app.route('/test-db')
-def test_db():
     """测试数据库连接"""
     import psycopg2
     from config import Config
@@ -26,7 +22,8 @@ def test_db():
         conn.close()
 
         return f"""
-        <h1>数据库连接测试</h1>
+        <h1>腾龙科技</h1>
+        <p>数据库连接测试</p>
         <p><strong>状态:</strong> <span style="color: green">连接成功</span></p>
         <p><strong>数据库:</strong> {db_name[0]}</p>
         <p><strong>版本:</strong> {version[0][:100]}...</p>

@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "<h1>腾龙科技</h1>"
+    return "<h1>腾龙科技1</h1>"
 
 @app.route('/test-db')
 def test_db():

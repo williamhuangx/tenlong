@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 腾龙科技{% endblock %}
+
+{% block content %}
+<div class="status-box">
+    <h2>数据库连接测试</h2>
+    {% if success %}
+        <p><strong>状态:</strong> <span class="success">连接成功</span></p>
+        <p><strong>数据库:</strong> {{ db_name }}</p>
+        <p><strong>版本:</strong> {{ version }}</p>
+    {% else %}
+        <p><strong>状态:</strong> <span class="error">连接失败</span></p>
+        <p><strong>错误:</strong> {{ error_type }}</p>
+        <p><strong>详情:</strong> {{ error_detail }}</p>
+    {% endif %}
+</div>
+
+<div style="margin-top: 30px;">
+    <h3>关于腾龙科技</h3>
+    <p>腾龙科技致力于提供优质的技术解决方案，专注于数据库服务和云平台应用。</p>
+    <ul>
+        <li>PostgreSQL 数据库服务</li>
+        <li>Web 应用开发</li>
+        <li>云平台集成</li>
+        <li>技术咨询与支持</li>
+    </ul>
+</div>
+{% endblock %}

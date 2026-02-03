@@ -1,10 +1,10 @@
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    """测试数据库连接"""
+    """首页 - 测试数据库连接"""
     import psycopg2
     from config import Config
 
@@ -21,21 +21,16 @@ def index():
         cursor.close()
         conn.close()
 
-        return f"""
-        <h1>腾龙科技</h1>
-        <p>数据库连接测试</p>
-        <p><strong>状态:</strong> <span style="color: green">连接成功</span></p>
-        <p><strong>数据库:</strong> {db_name[0]}</p>
-        <p><strong>版本:</strong> {version[0][:100]}...</p>
-        """
+        return render_template('index.html',
+                              success=True,
+                              db_name=db_name[0],
+                              version=version[0][:100] + '...')
 
     except Exception as e:
-        return f"""
-        <h1>数据库连接测试</h1>
-        <p><strong>状态:</strong> <span style="color: red">连接失败</span></p>
-        <p><strong>错误:</strong> {type(e).__name__}</p>
-        <p><strong>详情:</strong> {str(e)}</p>
-        """
+        return render_template('index.html',
+                              success=False,
+                              error_type=type(e).__name__,
+                              error_detail=str(e))
 
 if __name__ == '__main__':
     app.run(debug=True)

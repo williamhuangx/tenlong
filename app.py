@@ -27,7 +27,6 @@ def index():
         <p><strong>状态:</strong> <span style="color: green">连接成功</span></p>
         <p><strong>数据库:</strong> {db_name[0]}</p>
         <p><strong>版本:</strong> {version[0][:100]}...</p>
-        <p><a href="/">返回首页</a></p>
         """
 
     except Exception as e:
@@ -36,7 +35,6 @@ def index():
         <p><strong>状态:</strong> <span style="color: red">连接失败</span></p>
         <p><strong>错误:</strong> {type(e).__name__}</p>
         <p><strong>详情:</strong> {str(e)}</p>
-        <p><a href="/">返回首页</a></p>
         """
 
 if __name__ == '__main__':

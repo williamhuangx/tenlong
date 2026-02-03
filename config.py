@@ -12,7 +12,7 @@ class Config:
 
     # 如果没有提供 DATABASE_URL，则使用新的测试数据库连接
     if not _db_uri:
-        _db_uri = 'postgresql://neondb_owner:npg_p1PtmXBrjeF0@ep-royal-king-a1ltwxas.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
+        _db_uri = 'postgresql://neondb_owner:npg_p1PtmXBrjeF0@ep-royal-king-a1ltwxas-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
         
 
     # 最终的数据库 URI

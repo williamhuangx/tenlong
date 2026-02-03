@@ -4,5 +4,21 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
     # PostgreSQL 配置
-    # 使用 Neon PostgreSQL 连接
-    DB_URI = "postgresql://neondb_owner:npg_BTxJi97ZEYRr@ep-patient-lab-a1isve8g-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+    # 从环境变量 DATABASE_URL 或 POSTGRES_URL 读取，或使用本地配置
+    DATABASE_URL = os.environ.get('DATABASE_URL', '')
+    POSTGRES_URL = os.environ.get('POSTGRES_URL', '')
+    
+    if DATABASE_URL:
+        # 使用集成环境提供的 PostgreSQL (Vercel Neon)
+        DB_URI = DATABASE_URL
+    elif POSTGRES_URL:
+        # 使用 POSTGRES_URL (Vercel Neon 备用)
+        DB_URI = POSTGRES_URL
+    else:
+        # 使用本地 PostgreSQL 配置（默认）
+        PG_HOST = os.environ.get('PG_HOST', 'localhost')
+        PG_PORT = int(os.environ.get('PG_PORT', '5432'))
+        PG_USER = os.environ.get('PG_USER', 'postgres')
+        PG_PASSWORD = os.environ.get('PG_PASSWORD', 'postgres')
+        PG_DB = os.environ.get('PG_DATABASE', 'order_db')
+        DB_URI = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"

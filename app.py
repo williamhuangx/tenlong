@@ -44,7 +44,10 @@ def init_db():
         """
         result = db.fetch_one(check_init)
         if result and result['cnt'] > 0:
+            print("Database already initialized, skipping...")
             return
+
+        print("Initializing PostgreSQL database...")
 
         # Create users table
         create_users_table = """
@@ -136,16 +139,18 @@ def init_db():
                     try:
                         db.execute(query)
                     except Exception as e:
-                        pass
+                        # Column might already have the correct type
+                        print(f"Note: {e}")
             except Exception as e:
-                pass
+                print(f"Error updating column types: {e}")
 
             # Add image_data and image_content_type columns if they don't exist
             try:
                 db.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS image_data BYTEA")
                 db.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS image_content_type VARCHAR(100)")
+                print("Added image_data and image_content_type columns")
             except Exception as e:
-                pass
+                print(f"Note: {e}")
 
         # Ensure admin user exists and is properly configured
         admin = User.find_by_username('admin') or User.create('admin', 'admin123')
@@ -175,6 +180,7 @@ def init_db():
                 'fac': admin.get('fac') or admin_defaults['fac'],
                 'is_active': True
             })
+            print("Admin user configured successfully")
 
         # Mark database as initialized
         create_init_table = """
@@ -184,8 +190,11 @@ def init_db():
         )
         """
         db.execute(create_init_table)
+
+        print("PostgreSQL database initialized successfully")
     except Exception as e:
-        pass
+        print(f"PostgreSQL database initialization failed: {e}")
+        print("Application will continue, but some features may not work")
 
 
 def login_required(f):
@@ -197,6 +206,19 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def admin_required(f):
+    """Decorator to require admin access"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login first', 'warning')
+            return redirect(url_for('login'))
+        user = User.find_by_id(session['user_id'])
+        if not user or user['username'] != 'admin':
+            flash('Access denied. Admin only.', 'danger')
+            return redirect(url_for('order_list'))
 
 
 @app.route('/orders/update_status/<int:order_id>', methods=['POST'])
@@ -366,10 +388,6 @@ def profile():
     """User profile management"""
     user = User.find_by_id(session['user_id'])
 
-    if not user:
-        flash('User not found. Please try logging in again.', 'warning')
-        return redirect(url_for('login'))
-
     if request.method == 'POST':
         logo_data, logo_content_type = user.get('logo_data'), user.get('logo_content_type')
 
@@ -394,26 +412,20 @@ def profile():
             if not is_valid:
                 flash(error_msg, 'danger')
                 return render_template('profile.html', user=user)
-            try:
-                db.execute("UPDATE users SET password = %s WHERE id = %s", (generate_password_hash(new_password), user['id']))
-            except Exception:
-                flash('Failed to update password. Please try again later.', 'danger')
-                return render_template('profile.html', user=user)
+            db.execute("UPDATE users SET password = %s WHERE id = %s", (generate_password_hash(new_password), user['id']))
 
-        try:
-            User.update(user['id'], {
-                'username': user['username'],
-                'logo_data': logo_data,
-                'logo_content_type': logo_content_type,
-                'address': request.form.get('address') or '',
-                'tel': request.form.get('tel') or '',
-                'fac': request.form.get('fac') or '',
-                'is_active': user.get('is_active', False)
-            })
-            flash('Profile updated successfully', 'success')
-            return redirect(url_for('profile'))
-        except Exception:
-            flash('Failed to update profile. Please try again later.', 'danger')
+        User.update(user['id'], {
+            'username': user['username'],
+            'logo_data': logo_data,
+            'logo_content_type': logo_content_type,
+            'address': request.form.get('address') or '',
+            'tel': request.form.get('tel') or '',
+            'fac': request.form.get('fac') or '',
+            'is_active': user.get('is_active', False)
+        })
+
+        flash('Profile updated successfully', 'success')
+        return redirect(url_for('profile'))
 
     return render_template('profile.html', user=user)
 
@@ -703,10 +715,12 @@ def order_delete(order_id):
 if __name__ == '__main__':
     # Initialize database in background thread to avoid blocking startup
     def bg_init():
+        print("Starting background database initialization...")
         try:
             init_db()
+            print("Background database initialization completed")
         except Exception as e:
-            pass
+            print(f"Background database initialization error: {e}")
 
     init_thread = threading.Thread(target=bg_init, daemon=True)
     init_thread.start()

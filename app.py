@@ -12,7 +12,7 @@ def index():
                 cursor.execute("SELECT version(), current_database();")
                 version, db_name = cursor.fetchone()
 
-                return render_template('index.html',success=True,db_name=db_name,version=version[:100] + '...')
+                return render_template('index.html',success=True,db_name=db_name,version=version[:15])
 
     except Exception as e:
         return render_template('index.html',success=False,error_type=type(e).__name__,error_detail=str(e))

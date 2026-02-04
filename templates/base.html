@@ -9,19 +9,9 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>{% block header %}腾龙科技{% endblock %}</h1>
-            <nav class="nav">
-                <a href="/">首页</a>
-                {% block nav %}{% endblock %}
-            </nav>
-        </header>
-        <main>
-            {% block content %}{% endblock %}
-        </main>
-        <footer class="footer">
-            <p>&copy; 2026 腾龙科技 - All Rights Reserved</p>
-        </footer>
+        <header><h1>{% block header %}腾龙科技{% endblock %}</h1></header>
+        <main>{% block content %}{% endblock %}</main>
+        <footer class="footer"><p>&copy; 2026 腾龙科技 - All Rights Reserved</p></footer>
     </div>
 </body>
 </html>

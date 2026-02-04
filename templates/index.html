@@ -3,26 +3,192 @@
 {% block title %}腾龙科技 - 首页{% endblock %}
 
 {% block content %}
-<div class="status-box">
-    {% if success %}
-        <p><strong>状态:</strong> <span class="success">连接成功</span></p>
-        <p><strong>数据库:</strong> {{ db_name }}</p>
-        <p><strong>版本:</strong> {{ version }}</p>
-    {% else %}
-        <p><strong>状态:</strong> <span class="error">连接失败</span></p>
-        <p><strong>错误:</strong> {{ error_type }}</p>
-        <p><strong>详情:</strong> {{ error_detail }}</p>
-    {% endif %}
-</div>
+    <!-- 英雄区域 -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>引领技术创新<br>驱动业务增长</h1>
+                <p>腾龙科技提供专业的数据库服务和云平台解决方案，帮助企业实现数字化转型，提升核心竞争力。</p>
+                <div class="hero-buttons">
+                    <a href="#services" class="btn primary-btn">探索服务</a>
+                    <a href="#contact" class="btn secondary-btn">免费咨询</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">成功项目</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">200+</span>
+                        <span class="stat-label">企业客户</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">98%</span>
+                        <span class="stat-label">客户满意度</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20technology%20server%20room%20with%20database%20servers%20and%20digital%20visualization%20screens&image_size=landscape_16_9" alt="腾龙科技数据中心">
+            </div>
+        </div>
+    </section>
 
-<div style="margin-top: 30px;">
-    <h3>关于腾龙科技</h3>
-    <p>腾龙科技致力于提供优质的技术解决方案，专注于数据库服务和云平台应用。</p>
-    <ul>
-        <li>PostgreSQL 数据库服务</li>
-        <li>Web 应用开发</li>
-        <li>云平台集成</li>
-        <li>技术咨询与支持</li>
-    </ul>
-</div>
+    <!-- 数据库状态区域 -->
+    <section class="status-section">
+        <div class="container">
+            <div class="status-box {% if success %}success{% else %}error{% endif %}">
+                <h3>数据库连接状态</h3>
+                {% if success %}
+                    <p><strong>状态:</strong> <span class="status-indicator success">连接成功</span></p>
+                    <p><strong>数据库:</strong> {{ db_name }}</p>
+                    <p><strong>版本:</strong> {{ version }}</p>
+                {% else %}
+                    <p><strong>状态:</strong> <span class="status-indicator error">连接失败</span></p>
+                    <p><strong>错误:</strong> {{ error_type }}</p>
+                    <p><strong>详情:</strong> {{ error_detail }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- 服务区域 -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2>我们的核心服务</h2>
+                <p>提供全方位的技术解决方案，满足企业不同阶段的发展需求</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=database%20server%20icon%20modern%20flat%20design&image_size=square" alt="数据库服务">
+                    </div>
+                    <h3>PostgreSQL 数据库服务</h3>
+                    <p>专业的PostgreSQL数据库部署、优化和维护服务，确保数据安全可靠，性能卓越。</p>
+                    <a href="#" class="service-link">了解更多 →</a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=web%20application%20development%20icon%20modern%20flat%20design&image_size=square" alt="Web应用开发">
+                    </div>
+                    <h3>Web 应用开发</h3>
+                    <p>基于现代技术栈的Web应用开发，提供用户友好、性能优异的企业级应用解决方案。</p>
+                    <a href="#" class="service-link">了解更多 →</a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cloud%20platform%20integration%20icon%20modern%20flat%20design&image_size=square" alt="云平台集成">
+                    </div>
+                    <h3>云平台集成</h3>
+                    <p>无缝集成各大云平台服务，帮助企业构建弹性、可扩展的云基础设施，降低运维成本。</p>
+                    <a href="#" class="service-link">了解更多 →</a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=technical%20consulting%20support%20icon%20modern%20flat%20design&image_size=square" alt="技术咨询与支持">
+                    </div>
+                    <h3>技术咨询与支持</h3>
+                    <p>专业的技术团队提供全方位的咨询和支持服务，解决企业在技术实施过程中遇到的各种挑战。</p>
+                    <a href="#" class="service-link">了解更多 →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我们区域 -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20tech%20company%20office%20with%20professional%20team%20working&image_size=landscape_4_3" alt="腾龙科技团队">
+                </div>
+                <div class="about-text">
+                    <h2>关于腾龙科技</h2>
+                    <p>腾龙科技成立于2010年，是一家专注于数据库服务和云平台应用的高新技术企业。我们拥有一支经验丰富的技术团队，致力于为客户提供高质量的技术解决方案。</p>
+                    <p>多年来，我们服务了众多行业的企业客户，包括金融、制造、零售、医疗等领域，积累了丰富的行业经验和技术实力。我们始终坚持以客户需求为中心，不断创新技术和服务模式，为客户创造更大的价值。</p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <span class="feature-icon">✓</span>
+                            <span>10+ 年行业经验</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">✓</span>
+                            <span>专业技术认证团队</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">✓</span>
+                            <span>定制化解决方案</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">✓</span>
+                            <span>7×24小时技术支持</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 客户评价区域 -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>客户评价</h2>
+                <p>听听我们的客户怎么说</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        ★★★★★
+                    </div>
+                    <p>腾龙科技提供的PostgreSQL数据库服务非常专业，帮助我们解决了长期以来的性能问题，系统稳定性大幅提升。</p>
+                    <div class="testimonial-author">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20businessman%20headshot%20friendly%20smile&image_size=square" alt="客户头像">
+                        <div class="author-info">
+                            <h4>张总监</h4>
+                            <p>某金融科技公司</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        ★★★★★
+                    </div>
+                    <p>与腾龙科技合作开发的Web应用系统非常成功，他们的技术团队响应迅速，专业能力强，为我们的业务发展提供了有力支持。</p>
+                    <div class="testimonial-author">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20businesswoman%20headshot%20confident%20expression&image_size=square" alt="客户头像">
+                        <div class="author-info">
+                            <h4>李经理</h4>
+                            <p>某制造企业</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        ★★★★★
+                    </div>
+                    <p>腾龙科技的云平台集成方案帮助我们降低了IT运维成本，提高了系统的可扩展性和安全性，是值得信赖的技术合作伙伴。</p>
+                    <div class="testimonial-author">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20IT%20manager%20headshot%20thoughtful%20expression&image_size=square" alt="客户头像">
+                        <div class="author-info">
+                            <h4>王技术总监</h4>
+                            <p>某零售连锁企业</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 行动召唤区域 -->
+    <section id="contact" class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>准备好开始您的数字化转型之旅了吗？</h2>
+                <p>联系我们，获取免费的技术咨询和解决方案评估</p>
+                <a href="#" class="btn primary-btn large-btn">立即联系</a>
+            </div>
+        </div>
+    </section>
 {% endblock %}

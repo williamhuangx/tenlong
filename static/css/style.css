@@ -859,7 +859,7 @@ body {
 
 /* 焦点样式 */
 :focus {
-    outline: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
 
